@@ -7,7 +7,7 @@ IO.puts "SUM:"
 IO.puts Enum.sum(nums)
 
 defmodule NumSums do
-  def find_repeated(list), do: _find_repeated(list, list, 0, [])
+  def find_repeated(list), do: _find_repeated(list, list, 0, %{})
 
   # For when we need to loop back around because the list is empty
   defp _find_repeated(orig_list, [], total, previous_totals) do
@@ -17,10 +17,10 @@ defmodule NumSums do
   # For when the list is not empty
   defp _find_repeated(orig_list, [head|tail], total, previous_totals) do
     new_total = head + total
-    if new_total in previous_totals do
+    if Map.has_key?(previous_totals, new_total) do
       new_total
     else
-      _find_repeated(orig_list, tail, new_total, [total|previous_totals])
+      _find_repeated(orig_list, tail, new_total, Map.put_new(previous_totals, total, true))
     end
   end
 end
