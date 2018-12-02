@@ -17,11 +17,10 @@ defmodule NumSums do
   # For when the list is not empty
   defp _find_repeated(orig_list, [head|tail], total, previous_totals) do
     new_total = head + total
-    cond do
-      Enum.member?(previous_totals, new_total) ->
-        new_total
-      true ->
-        _find_repeated(orig_list, tail, new_total, [total|previous_totals])
+    if new_total in previous_totals do
+      new_total
+    else
+      _find_repeated(orig_list, tail, new_total, [total|previous_totals])
     end
   end
 end
