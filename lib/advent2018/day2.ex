@@ -1,4 +1,5 @@
-defmodule Inventory do
+# mix run -e 'Day2.run'
+defmodule Day2 do
   def words_from_file(filename) do
     File.stream!(filename) |> Stream.map(&String.trim_trailing/1) |> Enum.to_list
   end
@@ -60,22 +61,25 @@ defmodule Inventory do
   defp _common_letters([], [], letters) , do: String.reverse(Enum.join(letters))
   defp _common_letters([head1|tail1], [head2|tail2], letters) when head1 == head2, do: _common_letters(tail1, tail2, [head1|letters])
   defp _common_letters([head1|tail1], [head2|tail2], letters), do: _common_letters(tail1, tail2, letters)
+
+  def run do
+    IO.inspect(has_twos_threes("abcdef"), label: "Should be 0, 0")
+    IO.inspect(has_twos_threes("bababc"), label: "Should be 1, 1")
+    IO.inspect(has_twos_threes("abbcde"), label: "Should be 1, 0")
+    IO.inspect(has_twos_threes("abcccd"), label: "Should be 0, 1")
+    IO.inspect(has_twos_threes("aabcdd"), label: "Should be 1, 0")
+    IO.inspect(has_twos_threes("abcdee"), label: "Should be 1, 0")
+    IO.inspect(has_twos_threes("ababab"), label: "Should be 0, 1")
+
+    IO.puts "CHECKSUM"
+    IO.inspect(checksum("inputs/day2-sample.txt"), label: "Should be 12")
+    IO.inspect(checksum("inputs/day2.txt"), label: "FIRST STAR")
+
+    IO.puts "MATCHING BOXES"
+    IO.inspect(matches?("abcde", "axcye"), label: "Should be false")
+    IO.inspect(matches?("fghij", "fguij"), label: "Should be true")
+    IO.inspect(find_matching("inputs/day2-sample2.txt"), label: "Sample input")
+    IO.inspect(find_matching("inputs/day2.txt"), label: "Second star input")
+  end
 end
 
-IO.inspect(Inventory.has_twos_threes("abcdef"), label: "Should be 0, 0")
-IO.inspect(Inventory.has_twos_threes("bababc"), label: "Should be 1, 1")
-IO.inspect(Inventory.has_twos_threes("abbcde"), label: "Should be 1, 0")
-IO.inspect(Inventory.has_twos_threes("abcccd"), label: "Should be 0, 1")
-IO.inspect(Inventory.has_twos_threes("aabcdd"), label: "Should be 1, 0")
-IO.inspect(Inventory.has_twos_threes("abcdee"), label: "Should be 1, 0")
-IO.inspect(Inventory.has_twos_threes("ababab"), label: "Should be 0, 1")
-
-IO.puts "CHECKSUM"
-IO.inspect(Inventory.checksum("inputs/day2-sample.txt"), label: "Should be 12")
-IO.inspect(Inventory.checksum("inputs/day2.txt"), label: "FIRST STAR")
-
-IO.puts "MATCHING BOXES"
-IO.inspect(Inventory.matches?("abcde", "axcye"), label: "Should be false")
-IO.inspect(Inventory.matches?("fghij", "fguij"), label: "Should be true")
-IO.inspect(Inventory.find_matching("inputs/day2-sample2.txt"), label: "Sample input")
-IO.inspect(Inventory.find_matching("inputs/day2.txt"), label: "Second star input")
