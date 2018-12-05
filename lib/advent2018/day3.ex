@@ -44,14 +44,41 @@ defmodule Day3 do
     ceil[:sum]
   end
 
+  def has_overlaps?(claim, matrix) do
+    from_x = claim[:x] + 1
+    to_x = claim[:x] + claim[:width]
+    from_y = claim[:y] + 1
+    to_y = claim[:y] + claim[:height]
+    xs = Enum.map(from_x..to_x, fn(x) ->
+      ys = Enum.map(from_y..to_y, fn(y) ->
+        matrix[y][x] - 1
+      end)
+      if Enum.sum(ys) < 0 do
+        IO.inspect(claim)
+      end
+      Enum.sum(ys)
+    end)
+    Enum.sum(xs) > 0
+  end
+
+  def find_non_overlapper([head|tail], matrix) do
+    if has_overlaps?(head, matrix) do
+      find_non_overlapper(tail, matrix)
+    else
+      head[:id]
+    end
+  end
+
   def run do
     sample_claims = load_claims("inputs/day3-sample.txt")
     sample_matrix = build_matrix_for_all_claims(sample_claims)
     IO.inspect(count_overlaps(sample_matrix), label: "Sample overlaps (should be 4)")
+    IO.inspect(find_non_overlapper(sample_claims, sample_matrix), label: "Non-overlapping sample, should be 3")
 
     IO.puts("Full Size Claims")
     full_claims = load_claims("inputs/day3.txt")
     full_matrix = build_matrix_for_all_claims(full_claims)
     IO.inspect(count_overlaps(full_matrix), label: "First Star overlaps")
+    IO.inspect(find_non_overlapper(full_claims, full_matrix), label: "Second Star (1409 was too high! doh!)")
   end
 end
