@@ -28,11 +28,32 @@ defmodule Day5 do
     end
   end
 
+  def remove_char(polymer, char), do: _remove_char(polymer, char, String.capitalize(char), []) |> Enum.reverse()
+  defp _remove_char([], _, _, removed), do: removed
+  defp _remove_char([head|tail], char1, char2, removed) when head in [char1, char2], do: _remove_char(tail, char1, char2, removed)
+  defp _remove_char([head|tail], char1, char2, removed), do: _remove_char(tail, char1, char2, [head|removed])
+
+  def valid_chars, do: "abcdefghijklmnopqrstuvwxyz" |> String.graphemes()
+
+  def best_removal_unit(polymer), do: _best_removal_unit(polymer, valid_chars, 100000000)
+  defp _best_removal_unit(polymer, [], best_length), do: best_length
+  defp _best_removal_unit(polymer, [head|tail], best_length) do
+    new_length = remove_char(polymer, head) |> reduce_polymer() |> String.length()
+    if new_length < best_length do
+      _best_removal_unit(polymer, tail, new_length)
+    else
+      _best_removal_unit(polymer, tail, best_length)
+    end
+  end
+
   def run do
     sample_polymer = load_polymer("inputs/day5-sample.txt")
     IO.inspect(String.length(reduce_polymer(sample_polymer)), label: "Sample reduced length")
 
     polymer = load_polymer("inputs/day5.txt")
     IO.inspect(String.length(reduce_polymer(polymer)), label: "First star length")
+
+    IO.inspect(best_removal_unit(sample_polymer), label: "shortest polymer sample (should be 4)")
+    IO.inspect(best_removal_unit(polymer), label: "Second Star shortest polymer")
   end
 end
