@@ -74,11 +74,49 @@ defmodule Day6 do
     counts |> Enum.map(fn {_index, value} -> value end) |> Enum.max
   end
 
+  def map_value(coords, x, y, max_x, max_y) do
+    point = closest_point(coords, x, y)
+    if x == 0 || x == max_x || y == 0 || y == max_y do
+      {:edge, point}
+    else
+      {:center, point}
+    end
+  end
+
+  def dist_to_all_coords(coords, x, y), do: _dist_to_all_coords(coords, x, y, 0)
+  defp _dist_to_all_coords([], _, _, dist), do: dist
+  defp _dist_to_all_coords([head|tail], x, y, dist) do
+    this_dist = abs(x - head[:x]) + abs(y - head[:y])
+    _dist_to_all_coords(tail, x, y, dist + this_dist)
+  end
+
+  def safe_region_map_value(coords, x, y, max_dist) do
+    if dist_to_all_coords(coords, x, y) < max_dist do
+      1
+    else
+      0
+    end
+  end
+
+  def safe_region_size(coords, max_dist) do
+    [max_x, max_y] = max_row_col(coords)
+    xs = Enum.map(0..max_x, fn(x) ->
+      ys = Enum.map(0..max_y, fn(y) ->
+        safe_region_map_value(coords, x, y, max_dist)
+      end)
+      Enum.sum(ys)
+    end)
+    Enum.sum(xs)
+  end
+
   def run do
     sample_coords = read_lines("inputs/day6-sample.txt")
     IO.inspect(find_largest_area(sample_coords), label: "Sample max area")
 
     coords = read_lines("inputs/day6.txt")
     IO.inspect(find_largest_area(coords), label: "First Star max area")
+
+    IO.inspect(safe_region_size(sample_coords, 32), label: "Sample safe area")
+    IO.inspect(safe_region_size(coords, 10000), label: "Second Star safe area")
   end
 end
