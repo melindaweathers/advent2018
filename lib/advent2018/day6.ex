@@ -15,7 +15,6 @@ defmodule Day6 do
   end
 
   def closest_point(coords, x, y), do: _closest_point(coords, x, y, 1000000, "")
-  defp _closest_point(_, _, _, 0, _), do: [dist: 0, index: nil]
   defp _closest_point([], _, _, closest_dist, closest_coord), do: [dist: closest_dist, index: closest_coord]
   defp _closest_point([head|tail], x, y, closest_dist, closest_coord) do
     dist = abs(x - head[:x]) + abs(y - head[:y])
@@ -29,38 +28,57 @@ defmodule Day6 do
     end
   end
 
-  #def build_map(coords) do
-    #[max_x, max_y] = max_row_col(coords)
-    #Enum.map(0..max_x, fn(x) ->
-      #ys = Enum.map(0..max_y, fn(y) ->
-        #point = closest_point(coords, x, y)
-        #if x == 0 || x == max_x || y == 0 || y == max_y do
-          ## TODO: This is wrong
-          #area_counts[point[:index]] = [:infinite, 0, nil]
-        #else
-          #existing_counts = area_counts[points[:index]]
-          ## TODO: Update the counts unless it's already infinite.
+  def map_value(coords, x, y, max_x, max_y) do
+    point = closest_point(coords, x, y)
+    if x == 0 || x == max_x || y == 0 || y == max_y do
+      {:edge, point}
+    else
+      {:center, point}
+    end
+  end
 
+  def build_map(coords) do
+    [max_x, max_y] = max_row_col(coords)
+    Enum.map(0..max_x, fn(x) ->
+      Enum.map(0..max_y, fn(y) ->
+        map_value(coords, x, y, max_x, max_y)
+      end)
+    end)
+  end
 
-        #end
-      #end)
-    #end)
-  #end
+  def edge_indices(map), do: _edge_indices(map, MapSet.new())
+  defp _edge_indices([], indices), do: indices
+  defp _edge_indices([[]|other_cols], indices), do: _edge_indices(other_cols, indices)
+  defp _edge_indices([[{:center, _}|other_rows]|other_cols], indices), do: _edge_indices([other_rows|other_cols], indices)
+  defp _edge_indices([[{:edge, point}|other_rows]|other_cols], indices) do
+    _edge_indices([other_rows|other_cols], MapSet.put(indices, point[:index]))
+  end
 
-  #def find_largest_area(coords) do
-    #map = build_map(coords)
-    #area_counts = _find_largest_area(map, %{})
-    #area_counts # TODO: find the largest
-  #end
-  #defp _find_largest_area([[[head|remaining_rows]|remaining_cols], counts) do
-    #if 
+  def area_counts(map, infinites), do: _area_counts(map, infinites, %{})
+  def _area_counts([], _, counts), do: counts
+  def _area_counts([[]|other_cols], infinites, counts), do: _area_counts(other_cols, infinites, counts)
+  def _area_counts([[{:edge, _}|other_rows]|other_cols], infinites, counts), do: _area_counts([other_rows|other_cols], infinites, counts)
+  def _area_counts([[{:center, point}|other_rows]|other_cols], infinites, counts) do
+    if MapSet.member?(infinites, point[:index]) do
+      _area_counts([other_rows|other_cols], infinites, counts)
+    else
+      existing_count = Map.get(counts, point[:index], 0)
+      _area_counts([other_rows|other_cols], infinites, Map.put(counts, point[:index], existing_count + 1))
+    end
+  end
 
-  #end
-
+  def find_largest_area(coords) do
+    map = build_map(coords)
+    infinites = edge_indices(map)
+    counts = area_counts(map, infinites)
+    counts |> Enum.map(fn {_index, value} -> value end) |> Enum.max
+  end
 
   def run do
     sample_coords = read_lines("inputs/day6-sample.txt")
-    #IO.inspect(build_map(sample_coords))
+    IO.inspect(find_largest_area(sample_coords), label: "Sample max area")
 
+    coords = read_lines("inputs/day6.txt")
+    IO.inspect(find_largest_area(coords), label: "First Star max area")
   end
 end
