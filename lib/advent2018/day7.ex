@@ -52,36 +52,36 @@ defmodule Day7 do
     end
   end
 
-  def add_new_tasks(num_workers, extra_time, rules, in_flight, completed) do
+  def add_new_tasks(opts, in_flight, completed) do
     in_flight_steps = Enum.map(in_flight, fn step -> step[:task] end)
-    next_step = find_next_step(rules, completed, in_flight_steps)
-    if next_step && Enum.count(in_flight) < num_workers do
-      new_task = [task: next_step, time: List.first(String.to_charlist(next_step)) - 64 + extra_time]
-      add_new_tasks(num_workers, extra_time, rules, [new_task|in_flight], completed)
+    next_step = find_next_step(opts[:rules], completed, in_flight_steps)
+    if next_step && Enum.count(in_flight) < opts[:num_workers] do
+      new_task = [task: next_step, time: List.first(String.to_charlist(next_step)) - 64 + opts[:extra_time]]
+      add_new_tasks(opts, [new_task|in_flight], completed)
     else
       in_flight
     end
   end
 
-  def tick(num_workers, extra_time, rules, in_flight, completed) do
+  def tick(opts, in_flight, completed) do
     # progress in_flight queues by 1
     [new_in_flight, new_completed] = progress_tasks(in_flight, completed)
 
     # add workers if possible
-    added_in_flight = add_new_tasks(num_workers, extra_time, rules, new_in_flight, new_completed)
+    added_in_flight = add_new_tasks(opts, new_in_flight, new_completed)
 
     # return results
     [added_in_flight, new_completed]
   end
 
-  def find_times(num_workers, extra_time, rules) do
-    [in_flight, completed] = tick(num_workers, extra_time, rules, [], [])
-    _find_times(num_workers, extra_time, rules, in_flight, completed, 0)
+  def find_times(opts) do
+    [in_flight, completed] = tick(opts, [], [])
+    _find_times(opts, in_flight, completed, 0)
   end
-  defp _find_times(_, _, _, [], _, time), do: time
-  defp _find_times(num_workers, extra_time, rules, in_flight, completed, time) do
-    [new_in_flight, new_completed] = tick(num_workers, extra_time, rules, in_flight, completed)
-    _find_times(num_workers, extra_time, rules, new_in_flight, new_completed, time + 1)
+  defp _find_times( _, [], _, time), do: time
+  defp _find_times(opts, in_flight, completed, time) do
+    [new_in_flight, new_completed] = tick(opts, in_flight, completed)
+    _find_times(opts, new_in_flight, new_completed, time + 1)
   end
 
   def run do
@@ -91,8 +91,8 @@ defmodule Day7 do
     rules = build_rules("inputs/day7.txt")
     IO.inspect(find_step_order(rules), label: "First Star Step Order")
 
-    IO.inspect(find_times(2, 0, sample_rules), label: "Sample Total Time")
+    IO.inspect(find_times([num_workers: 2, extra_time: 0, rules: sample_rules]), label: "Sample Total Time")
 
-    IO.inspect(find_times(5, 60, rules), label: "Second Star Total Time")
+    IO.inspect(find_times([num_workers: 5, extra_time: 60, rules: rules]), label: "Second Star Total Time")
   end
 end
