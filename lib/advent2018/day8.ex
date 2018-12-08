@@ -16,9 +16,8 @@ defmodule Day8 do
   def build_children(num_children, data), do: _build_children(num_children, data, [])
   defp _build_children(0, data, children), do: [children |> Enum.reverse(), data]
   defp _build_children(num_children, data, children) do
-    [child_num_children|tail] = data
-    [child_num_metadata|new_tail] = tail
-    [child_children, remaining] = build_children(child_num_children, new_tail)
+    [child_num_children|[child_num_metadata|tail]] = data
+    [child_children, remaining] = build_children(child_num_children, tail)
     [metadata, rest] = split_metadata(remaining, child_num_metadata)
     child = %Node{num_children: child_num_children, num_metadata: child_num_metadata, children: child_children, metadata: metadata}
     _build_children(num_children - 1, rest, [child|children])
