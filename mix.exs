@@ -21,7 +21,7 @@ defmodule Advent2018.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:matrex, "~> 0.6"}
+      #{:matrex, "~> 0.6"}
     ]
   end
 end
