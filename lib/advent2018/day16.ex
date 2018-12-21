@@ -46,9 +46,55 @@ defmodule Day16 do
   #bori (bitwise OR immediate) stores into register C the result of the bitwise OR of register A and value B.
   def bori([a, b, c], reg), do: regset(reg, c, bor(regget(reg, a), b))
 
+  #setr (set register) copies the contents of register A into register C. (Input B is ignored.)
+  def setr([a, _, c], reg), do: regset(reg, c, regget(reg, a))
+  #seti (set immediate) stores value A into register C. (Input B is ignored.)
+  def seti([a, _, c], reg), do: regset(reg, c, a)
 
+  #gtir (greater-than immediate/register) sets register C to 1 if value A is greater than register B. Otherwise, register C is set to 0.
+  def gtir([a, b, c], reg), do: regset(reg, c, (if a > regget(reg, b), do: 1, else: 0))
+  #gtri (greater-than register/immediate) sets register C to 1 if register A is greater than value B. Otherwise, register C is set to 0.
+  def gtri([a, b, c], reg), do: regset(reg, c, (if regget(reg, a) > b, do: 1, else: 0))
+  #gtrr (greater-than register/register) sets register C to 1 if register A is greater than register B. Otherwise, register C is set to 0.
+  def gtrr([a, b, c], reg), do: regset(reg, c, (if regget(reg, a) > regget(reg, b), do: 1, else: 0))
+
+  #eqir (equal immediate/register) sets register C to 1 if value A is equal to register B. Otherwise, register C is set to 0.
+  def eqir([a, b, c], reg), do: regset(reg, c, (if a == regget(reg, b), do: 1, else: 0))
+  #eqri (equal register/immediate) sets register C to 1 if register A is equal to value B. Otherwise, register C is set to 0.
+  def eqri([a, b, c], reg), do: regset(reg, c, (if regget(reg, a) == b, do: 1, else: 0))
+  #eqrr (equal register/register) sets register C to 1 if register A is equal to register B. Otherwise, register C is set to 0.
+  def eqrr([a, b, c], reg), do: regset(reg, c, (if regget(reg, a) == regget(reg, b), do: 1, else: 0))
+
+  def all_fns do
+    [:addr, :addi, :mulr, :muli, :banr, :bani, :borr, :bori, :setr, :seti, :gtir, :gtri, :gtrr, :eqir, :eqri, :eqrr]
+  end
+
+  def matching_fns(sample), do: _matching_fns(sample, all_fns(), [])
+  defp _matching_fns(_, [], fns), do: fns
+  defp _matching_fns(sample, [head|tail], fns) do
+    {before, [_,a,b,c], aft} = sample
+    if apply(Day16, head, [[a,b,c], before]) == aft do
+      _matching_fns(sample, tail, [head|fns])
+    else
+      _matching_fns(sample, tail, fns)
+    end
+  end
+
+  def find_over_three_matches(samples), do: _find_over_three_matches(samples, 0)
+  defp _find_over_three_matches([], count), do: count
+  defp _find_over_three_matches([head|tail], count) do
+    if Enum.count(matching_fns(head)) >= 3 do
+      _find_over_three_matches(tail, count + 1)
+    else
+      _find_over_three_matches(tail, count)
+    end
+  end
 
   def run do
-    IO.inspect(Day16.build_instructions("inputs/day16a-sample.txt"))
+    sample_samples = Day16.build_instructions("inputs/day16a-sample.txt")
+    IO.inspect(find_over_three_matches(sample_samples), label: "First Sample")
+
+    samples = Day16.build_instructions("inputs/day16a.txt")
+    IO.inspect(find_over_three_matches(samples), label: "First Star")
   end
 end
