@@ -1,5 +1,5 @@
 defmodule Day19 do
-  import ElfCode
+  require ElfCode
 
   def execute_instructions(ip, instructions) do
     _execute_instructions(ip, instructions, {0, 0, 0, 0, 0, 0})
@@ -8,14 +8,14 @@ defmodule Day19 do
     _execute_instructions(ip, instructions, reg)
   end
   defp _execute_instructions(ip, instructions, reg) do
-    instruction = Map.get(instructions, regget(reg, ip), :exit)
+    instruction = Map.get(instructions, ElfCode.regget(reg, ip), :exit)
     if instruction == :exit do
-      addi({ip, -1, ip}, reg)
+      ElfCode.addi({ip, -1, ip}, reg)
     else
       {method,a,b,c} = instruction
       new_reg = apply(ElfCode, method, [{a,b,c},reg])
       #IO.inspect([reg, instruction, new_reg])
-      _execute_instructions(ip, instructions, addi({ip, 1, ip}, new_reg))
+      _execute_instructions(ip, instructions, ElfCode.addi({ip, 1, ip}, new_reg))
     end
   end
 
