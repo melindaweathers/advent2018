@@ -72,7 +72,8 @@ defmodule Day19 do
     else
       {method,a,b,c} = instruction
       new_reg = apply(Day19, method, [{a,b,c},reg])
-      IO.inspect([reg, instruction, new_reg])
+      #IO.inspect([reg, instruction, new_reg])
+      #IO.gets("Next?")
       _execute_instructions(ip, instructions, addi({ip, 1, ip}, new_reg))
     end
   end
@@ -80,10 +81,11 @@ defmodule Day19 do
   def run do
     {sample_ip, sample_instructions} = Day19.build_instructions("inputs/day19-sample.txt")
     IO.inspect(sample_instructions)
-    IO.inspect(execute_instructions(sample_ip, sample_instructions))
+    IO.inspect(execute_instructions(sample_ip, sample_instructions, {0, 10, 1, 0, 940, 950}))
 
     {ip, instructions} = Day19.build_instructions("inputs/day19.txt")
-    #IO.inspect(execute_instructions(ip, instructions), label: "First Star")
-    IO.inspect(execute_instructions(ip, instructions, {1, 0, 0, 0, 0, 0}), label: "Second Star")
+    IO.inspect(execute_instructions(ip, instructions), label: "First Star")
+    # Solved separately!
+    # IO.inspect(execute_instructions(ip, instructions, {1, 0, 0, 0, 0, 0}), label: "Second Star")
   end
 end
