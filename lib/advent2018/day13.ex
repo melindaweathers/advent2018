@@ -4,24 +4,30 @@ defmodule Day13 do
   end
 
   def load_track(filename) do
-    chars = File.stream!(filename) |> Stream.map(&(String.trim_trailing(&1,"\n")))|> Stream.map(&(String.graphemes/1)) |> Enum.to_list
-    {map, final_carts} = Enum.reduce(Enum.with_index(chars), {Map.new(),[]}, fn({row,y}, acc) ->
-      {rows, carts} = acc
-      {row_chars, row_carts} = Enum.reduce(Enum.with_index(row), {Map.new(),[]}, fn({char,x}, acc) ->
-        {chars, carts} = acc
-        cond do
-          char in ["<",">"] ->
-            {Map.put(chars, x, "-"), [%Cart{direction: char, x: x, y: y}|carts]}
-          char in ["v","^"] ->
-            {Map.put(chars, x, "|"), [%Cart{direction: char, x: x, y: y}|carts]}
-          true ->
-            {Map.put(chars, x, char), carts}
-        end
+    File.stream!(filename)
+      |> Stream.map(&(String.trim_trailing(&1,"\n")))
+      |> Stream.map(&(String.graphemes/1))
+      |> Stream.with_index
+      |> Enum.to_list
+      |> load_track_rows
+  end
+
+  def load_track_rows(rows_with_index) do
+    Enum.reduce(rows_with_index, {%{},[]}, fn({row,y}, {rows, carts}) ->
+      {row_chars, row_carts} = Enum.reduce(Enum.with_index(row), {%{},[]}, fn({char,x}, acc) ->
+        load_track_char(char, x, y, acc)
       end)
       {Map.put(rows, y, row_chars), carts ++ row_carts}
     end)
-    {map, sort_carts(final_carts)}
   end
+
+  def load_track_char(char, x, y, {chars, carts}) when char in [">","<"] do
+    { Map.put(chars, x, "-"), [%Cart{direction: char, x: x, y: y}|carts] }
+  end
+  def load_track_char(char, x, y, {chars, carts}) when char in ["v","^"] do
+    { Map.put(chars, x, "|"), [%Cart{direction: char, x: x, y: y}|carts] }
+  end
+  def load_track_char(char, x, _, {chars, carts}), do: { Map.put(chars, x, char), carts }
 
   def sort_carts(carts) do
     Enum.sort(carts, fn(cart1,cart2) -> (cart1.y < cart2.y) || (cart1.y == cart2.y && cart1.x <= cart2.x) end)
@@ -71,7 +77,7 @@ defmodule Day13 do
     %Cart{direction: dir, x: x, y: y, turns: turns}
   end
 
-  def move_carts(track, carts), do: _move_carts(track, carts, [])
+  def move_carts(track, carts), do: _move_carts(track, sort_carts(carts), [])
   defp _move_carts(track, [], moved_carts), do: _move_carts(track, sort_carts(moved_carts), [])
   defp _move_carts(track, [cart|tail], moved_carts) do
     new_cart = move_cart(track, cart)
