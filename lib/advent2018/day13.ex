@@ -1,6 +1,6 @@
 defmodule Day13 do
   defmodule Cart do
-    defstruct direction: ">", x: 0, y: 0, turns: [:left, :straight, :right, :straight]
+    defstruct direction: ">", x: 0, y: 0, turns: [:left, :straight, :right]
   end
 
   def load_track(filename) do
@@ -75,8 +75,8 @@ defmodule Day13 do
   def turn(:straight, dir), do: dir
 
   def next_cart_orientation(cart, "+") do
-    [a, b, c, d] = cart.turns
-    {turn(a, cart.direction), [b, c, d, a]}
+    [a, b, c] = cart.turns
+    {turn(a, cart.direction), [b, c, a]}
   end
   def next_cart_orientation(cart, char), do: {next_direction(cart.direction, char), cart.turns}
 
